@@ -1,0 +1,19 @@
+package com.platform.custommade.repository;
+
+import com.platform.custommade.model.Order;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface OrderRepository extends JpaRepository<Order, Long> {
+
+    // Find all orders for a specific customer
+    List<Order> findByCustomerId(Long customerId);
+
+    // Find all orders for a specific tailor
+    List<Order> findByTailorId(Long tailorId);
+
+    // Optional: find by request ID
+    Optional<Order> findByRequestId(Long requestId);
+}

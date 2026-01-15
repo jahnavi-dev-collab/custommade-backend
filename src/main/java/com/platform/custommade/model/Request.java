@@ -11,78 +11,92 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Link to customer
+    // Customer who created the request
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
-    private String garmentType;
+    // Shirt, Suit, Dress, etc.
+    @Column(nullable = false)
+    private String category;
 
-    private String gender;
-
-    private String occasion;
-
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    // Optional fabric preference
+    private String fabricPref;
+
+    // Request lifecycle status
     @Enumerated(EnumType.STRING)
-    private FabricOption fabricOption; // CUSTOMER or TAILOR
+    @Column(nullable = false)
+    private RequestStatus status;
 
-    private Double budgetMin;
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
-    private Double budgetMax;
+    // Expected delivery timeline
+    @Column(nullable = false)
+    private LocalDateTime expectedDeliveryDate;
 
-    private LocalDateTime deliveryDeadline;
+    // ---------------- GETTERS & SETTERS ----------------
 
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status; // REQUEST_CREATED, CLOSED
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    // Getters and Setters
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public User getCustomer() { return customer; }
-    public void setCustomer(User customer) { this.customer = customer; }
-
-    public String getGarmentType() { return garmentType; }
-    public void setGarmentType(String garmentType) { this.garmentType = garmentType; }
-
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
-
-    public String getOccasion() { return occasion; }
-    public void setOccasion(String occasion) { this.occasion = occasion; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public FabricOption getFabricOption() { return fabricOption; }
-    public void setFabricOption(FabricOption fabricOption) { this.fabricOption = fabricOption; }
-
-    public Double getBudgetMin() { return budgetMin; }
-    public void setBudgetMin(Double budgetMin) { this.budgetMin = budgetMin; }
-
-    public Double getBudgetMax() { return budgetMax; }
-    public void setBudgetMax(Double budgetMax) { this.budgetMax = budgetMax; }
-
-    public LocalDateTime getDeliveryDeadline() { return deliveryDeadline; }
-    public void setDeliveryDeadline(LocalDateTime deliveryDeadline) { this.deliveryDeadline = deliveryDeadline; }
-
-    public RequestStatus getStatus() { return status; }
-    public void setStatus(RequestStatus status) { this.status = status; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    // Enums
-    public enum FabricOption {
-        CUSTOMER, TAILOR
+    public Long getId() {
+        return id;
     }
 
-    public enum RequestStatus {
-        REQUEST_CREATED, CLOSED
+    public User getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(User customer) {
+        this.customer = customer;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getFabricPref() {
+        return fabricPref;
+    }
+
+    public void setFabricPref(String fabricPref) {
+        this.fabricPref = fabricPref;
+    }
+
+    public RequestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getExpectedDeliveryDate() {
+        return expectedDeliveryDate;
+    }
+
+    public void setExpectedDeliveryDate(LocalDateTime expectedDeliveryDate) {
+        this.expectedDeliveryDate = expectedDeliveryDate;
     }
 }
