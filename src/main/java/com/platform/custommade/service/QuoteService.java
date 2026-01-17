@@ -11,7 +11,6 @@ import com.platform.custommade.repository.QuoteRepository;
 import com.platform.custommade.repository.RequestRepository;
 import com.platform.custommade.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,29 +22,26 @@ public class QuoteService {
     private final QuoteRepository quoteRepository;
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
-    private final OrderService orderService;
 
-    public QuoteService(
-            QuoteRepository quoteRepository,
-            RequestRepository requestRepository,
-            UserRepository userRepository,
-            OrderService orderService
-    ) {
+    public QuoteService(QuoteRepository quoteRepository,
+                        RequestRepository requestRepository,
+                        UserRepository userRepository) {
         this.quoteRepository = quoteRepository;
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
-        this.orderService = orderService;
     }
 
-    // ✅ CREATE QUOTE
+    // ================= CREATE =================
     public QuoteResponseDTO createQuote(CreateQuoteDTO dto, Long tailorId) {
-
+        // Check request exists
         Request request = requestRepository.findById(dto.getRequestId())
-                .orElseThrow(() -> new ResourceNotFoundException("Request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + dto.getRequestId()));
 
+        // Check tailor exists
         User tailor = userRepository.findById(tailorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Tailor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tailor not found with id: " + tailorId));
 
+        // Create quote
         Quote quote = new Quote();
         quote.setRequest(request);
         quote.setTailor(tailor);
@@ -55,55 +51,57 @@ public class QuoteService {
         quote.setStatus(QuoteStatus.SUBMITTED);
         quote.setCreatedAt(LocalDateTime.now());
 
-        return mapToResponse(quoteRepository.save(quote));
+        Quote saved = quoteRepository.save(quote);
+        return mapToResponseDTO(saved);
     }
 
+    // ================= READ =================
     public List<QuoteResponseDTO> getQuotesByRequest(Long requestId) {
-        return quoteRepository.findByRequestId(requestId)
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + requestId));
+
+        return quoteRepository.findByRequestId(request.getId())
                 .stream()
-                .map(this::mapToResponse)
+                .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    // ✅ GET QUOTE BY ID
     public QuoteResponseDTO getQuoteById(Long quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
-        return mapToResponse(quote);
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found with id: " + quoteId));
+
+        return mapToResponseDTO(quote);
     }
 
-    // ✅ ACCEPT QUOTE → CREATE ORDER
+    // ================= UPDATE =================
     public QuoteResponseDTO acceptQuote(Long quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found with id: " + quoteId));
 
         quote.setStatus(QuoteStatus.ACCEPTED);
-        quoteRepository.save(quote);
-
-        orderService.createOrder(quoteId);
-
-        return mapToResponse(quote);
+        Quote saved = quoteRepository.save(quote);
+        return mapToResponseDTO(saved);
     }
 
-    // ✅ REJECT QUOTE
     public QuoteResponseDTO rejectQuote(Long quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quote not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Quote not found with id: " + quoteId));
 
         quote.setStatus(QuoteStatus.REJECTED);
-        return mapToResponse(quoteRepository.save(quote));
+        Quote saved = quoteRepository.save(quote);
+        return mapToResponseDTO(saved);
     }
 
-    // 🔁 MAPPER
-    private QuoteResponseDTO mapToResponse(Quote q) {
+    // ================= MAPPER =================
+    private QuoteResponseDTO mapToResponseDTO(Quote quote) {
         QuoteResponseDTO dto = new QuoteResponseDTO();
-        dto.setId(q.getId());
-        dto.setRequestId(q.getRequest().getId());
-        dto.setTailorId(q.getTailor().getId());
-        dto.setPrice(q.getPrice());
-        dto.setDeliveryDays(q.getDeliveryDays());
-        dto.setNotes(q.getNotes());
-        dto.setStatus(q.getStatus().name());
+        dto.setId(quote.getId());
+        dto.setRequestId(quote.getRequest().getId());
+        dto.setTailorId(quote.getTailor().getId());
+        dto.setPrice(quote.getPrice());
+        dto.setDeliveryDays(quote.getDeliveryDays());
+        dto.setNotes(quote.getNotes());
+        dto.setStatus(quote.getStatus().name());
         return dto;
     }
 }

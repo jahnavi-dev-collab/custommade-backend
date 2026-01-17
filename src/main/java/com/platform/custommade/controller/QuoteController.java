@@ -20,11 +20,12 @@ public class QuoteController {
     // ✅ CREATE QUOTE (Tailor)
     @PostMapping
     public QuoteResponseDTO createQuote(
-            @RequestParam Long tailorId,
+            @RequestParam("tailorId") Long tailorId,  // explicitly specify the name
             @RequestBody CreateQuoteDTO dto
     ) {
         return quoteService.createQuote(dto, tailorId);
     }
+
 
     @GetMapping("/request/{requestId}")
     public List<QuoteResponseDTO> getQuotesByRequest(
