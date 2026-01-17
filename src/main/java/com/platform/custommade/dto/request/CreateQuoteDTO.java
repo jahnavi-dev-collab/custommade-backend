@@ -1,8 +1,6 @@
 package com.platform.custommade.dto.request;
 
-import java.time.LocalDate;
-
-public class RequestQuoteDTO {
+public class CreateQuoteDTO {
     private Long requestId;
     private Double price;
     private Integer deliveryDays;

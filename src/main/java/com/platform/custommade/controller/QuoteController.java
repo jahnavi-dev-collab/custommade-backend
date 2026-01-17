@@ -1,6 +1,7 @@
 package com.platform.custommade.controller;
 
-import com.platform.custommade.model.Quote;
+import com.platform.custommade.dto.request.CreateQuoteDTO;
+import com.platform.custommade.dto.response.QuoteResponseDTO;
 import com.platform.custommade.service.QuoteService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,31 +17,41 @@ public class QuoteController {
         this.quoteService = quoteService;
     }
 
-    // ✅ Tailor creates a quote for a request
+    // ✅ CREATE QUOTE (Tailor)
     @PostMapping
-    public Quote createQuote(
-            @RequestParam Long requestId,
+    public QuoteResponseDTO createQuote(
             @RequestParam Long tailorId,
-            @RequestBody Quote quote
+            @RequestBody CreateQuoteDTO dto
     ) {
-        return quoteService.createQuote(requestId, tailorId, quote);
+        return quoteService.createQuote(dto, tailorId);
     }
 
-    // ✅ Customer views all quotes for a request
     @GetMapping("/request/{requestId}")
-    public List<Quote> getQuotesByRequest(@PathVariable Long requestId) {
+    public List<QuoteResponseDTO> getQuotesByRequest(
+            @PathVariable("requestId") Long requestId
+    ) {
         return quoteService.getQuotesByRequest(requestId);
     }
 
-    // ✅ Customer accepts a quote
+
+    // ✅ GET QUOTE BY ID
+    @GetMapping("/{quoteId}")
+    public QuoteResponseDTO getQuoteById(@PathVariable Long quoteId) {
+        return quoteService.getQuoteById(quoteId);
+    }
+
+    // ✅ ACCEPT QUOTE
     @PutMapping("/{quoteId}/accept")
-    public Quote acceptQuote(@PathVariable Long quoteId) {
+    public QuoteResponseDTO acceptQuote(
+            @PathVariable("quoteId") Long quoteId
+    ) {
         return quoteService.acceptQuote(quoteId);
     }
 
-    // ✅ Customer rejects a quote
+
+    // ✅ REJECT QUOTE
     @PutMapping("/{quoteId}/reject")
-    public Quote rejectQuote(@PathVariable Long quoteId) {
+    public QuoteResponseDTO rejectQuote(@PathVariable Long quoteId) {
         return quoteService.rejectQuote(quoteId);
     }
 }

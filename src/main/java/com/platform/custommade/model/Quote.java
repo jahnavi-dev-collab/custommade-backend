@@ -11,12 +11,10 @@ public class Quote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // The customer request this quote belongs to
     @ManyToOne
     @JoinColumn(name = "request_id", nullable = false)
     private Request request;
 
-    // The tailor who created this quote
     @ManyToOne
     @JoinColumn(name = "tailor_id", nullable = false)
     private User tailor;
@@ -24,7 +22,9 @@ public class Quote {
     private Double price;
     private Double advanceAmount;
     private int deliveryDays;
-    private String fabricPlan;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
 
     @Enumerated(EnumType.STRING)
     private QuoteStatus status;
@@ -81,12 +81,12 @@ public class Quote {
         this.deliveryDays = deliveryDays;
     }
 
-    public String getFabricPlan() {
-        return fabricPlan;
+    public String getNotes() {
+        return notes;
     }
 
-    public void setFabricPlan(String fabricPlan) {
-        this.fabricPlan = fabricPlan;
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public QuoteStatus getStatus() {

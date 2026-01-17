@@ -7,35 +7,6 @@ import java.time.LocalDateTime;
 @Table(name = "orders")
 public class Order {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "request_id")
-    private Request request;
-
-    @OneToOne
-    @JoinColumn(name = "quote_id")
-    private Quote quote;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private User customer;
-
-    @ManyToOne
-    @JoinColumn(name = "tailor_id")
-    private User tailor;
-
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-
-    private LocalDateTime createdAt;
-
-    // -----------------------------
-    // Getters & Setters
-    // -----------------------------
-
     public Long getId() {
         return id;
     }
@@ -90,5 +61,37 @@ public class Order {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // getters & setters
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "request_id", nullable = false)
+    private Request request;
+
+    @OneToOne
+    @JoinColumn(name = "quote_id", nullable = false, unique = true)
+    private Quote quote;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private User customer;
+
+    @ManyToOne
+    @JoinColumn(name = "tailor_id", nullable = false)
+    private User tailor;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

@@ -1,23 +1,16 @@
 package com.platform.custommade.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class CreateRequestDTO {
 
-    @NotBlank
-    private String category;   // Shirt, Suit, Dress, etc.
-
-    @NotBlank
+    private String category;
     private String description;
-
-    private String fabricPref; // Optional
-
-    @NotNull
+    private String fabricPref;
     private LocalDateTime expectedDeliveryDate;
 
-    // getters & setters
+    // -------- GETTERS & SETTERS --------
+
     public String getCategory() {
         return category;
     }

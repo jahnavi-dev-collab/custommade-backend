@@ -11,7 +11,7 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Long> {
 
     // Get all requests created by a customer
-    List<Request> findByCustomer(User customer);
+    List<Request> findByCustomerId(Long customerId);
 
     // Optional: filter by status (OPEN / CLOSED)
     List<Request> findByStatus(String status);

@@ -8,10 +8,12 @@ public class RequestResponseDTO {
     private String category;
     private String description;
     private String fabricPref;
-    private String status; // OPEN / CLOSED
+    private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime expectedDeliveryDate;
 
-    // getters & setters
+    // -------- GETTERS & SETTERS --------
+
     public Long getId() {
         return id;
     }
@@ -59,4 +61,13 @@ public class RequestResponseDTO {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public LocalDateTime getExpectedDeliveryDate() {
+        return expectedDeliveryDate;
+    }
+
+    public void setExpectedDeliveryDate(LocalDateTime expectedDeliveryDate) {
+        this.expectedDeliveryDate = expectedDeliveryDate;
+    }
+
 }

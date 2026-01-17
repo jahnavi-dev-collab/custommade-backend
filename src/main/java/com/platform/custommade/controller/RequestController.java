@@ -1,6 +1,7 @@
 package com.platform.custommade.controller;
 
-import com.platform.custommade.model.Request;
+import com.platform.custommade.dto.request.CreateRequestDTO;
+import com.platform.custommade.dto.response.RequestResponseDTO;
 import com.platform.custommade.service.RequestService;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +17,26 @@ public class RequestController {
         this.requestService = requestService;
     }
 
-    // Create request
+    // ✅ Create request
     @PostMapping
-    public Request createRequest(
+    public RequestResponseDTO createRequest(
             @RequestParam("customerId") Long customerId,
-            @RequestBody Request request
+            @RequestBody CreateRequestDTO dto
     ) {
-        return requestService.createRequest(customerId, request);
+        return requestService.createRequest(customerId, dto);
     }
 
-    // Get all requests of a customer
+    // ✅ Get all requests of a customer
     @GetMapping("/customer/{customerId}")
-    public List<Request> getRequestsByCustomer(
+    public List<RequestResponseDTO> getRequestsByCustomer(
             @PathVariable("customerId") Long customerId
     ) {
         return requestService.getRequestsByCustomer(customerId);
     }
 
-    // Get request by ID
+    // ✅ Get request by ID
     @GetMapping("/{requestId}")
-    public Request getRequestById(
+    public RequestResponseDTO getRequestById(
             @PathVariable("requestId") Long requestId
     ) {
         return requestService.getRequestById(requestId);

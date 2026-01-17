@@ -1,5 +1,6 @@
 package com.platform.custommade.service;
 
+import com.platform.custommade.dto.response.OrderResponseDTO;
 import com.platform.custommade.exception.ResourceNotFoundException;
 import com.platform.custommade.model.Order;
 import com.platform.custommade.model.OrderStatus;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -17,44 +19,69 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final QuoteRepository quoteRepository;
 
-    // Constructor Injection (best practice)
-    public OrderService(OrderRepository orderRepository, QuoteRepository quoteRepository) {
+    public OrderService(OrderRepository orderRepository,
+                        QuoteRepository quoteRepository) {
         this.orderRepository = orderRepository;
         this.quoteRepository = quoteRepository;
     }
 
-    // Create an order from a quote
-    public Order createOrder(Long quoteId) {
+    // ✅ Create order from accepted quote
+    public OrderResponseDTO createOrder(Long quoteId) {
+
         Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quote not found with id: " + quoteId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Quote not found with id: " + quoteId)
+                );
 
         Order order = new Order();
         order.setQuote(quote);
         order.setRequest(quote.getRequest());
         order.setCustomer(quote.getRequest().getCustomer());
         order.setTailor(quote.getTailor());
-        order.setStatus(OrderStatus.PAID); // initially PAID once advance payment is done
+        order.setStatus(OrderStatus.PAID);
         order.setCreatedAt(LocalDateTime.now());
 
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        return mapToResponse(saved);
     }
 
-    // Update order status
-    public Order updateOrderStatus(Long orderId, OrderStatus status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+    // ✅ Get order by quoteId
+    public OrderResponseDTO getOrderByQuoteId(Long quoteId) {
 
-        order.setStatus(status);
-        return orderRepository.save(order);
+        Order order = orderRepository.findByQuoteId(quoteId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Order not found for quoteId: " + quoteId)
+                );
+
+        return mapToResponse(order);
     }
 
-    // Get all orders by customer
-    public List<Order> getOrdersByCustomer(Long customerId) {
-        return orderRepository.findByCustomerId(customerId);
+    // ✅ Orders by customer
+    public List<OrderResponseDTO> getOrdersByCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    // Get all orders by tailor
-    public List<Order> getOrdersByTailor(Long tailorId) {
-        return orderRepository.findByTailorId(tailorId);
+    // ✅ Orders by tailor
+    public List<OrderResponseDTO> getOrdersByTailor(Long tailorId) {
+        return orderRepository.findByTailorId(tailorId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // 🔁 MAPPER (THIS WAS MISSING)
+    private OrderResponseDTO mapToResponse(Order order) {
+        OrderResponseDTO dto = new OrderResponseDTO();
+        dto.setId(order.getId());
+        dto.setCustomerId(order.getCustomer().getId());
+        dto.setTailorId(order.getTailor().getId());
+        dto.setRequestId(order.getRequest().getId());
+        dto.setQuoteId(order.getQuote().getId());
+        dto.setStatus(order.getStatus().name());
+        dto.setCreatedAt(order.getCreatedAt());
+        return dto;
     }
 }

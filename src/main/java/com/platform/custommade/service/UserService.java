@@ -6,6 +6,7 @@ import com.platform.custommade.model.User;
 import com.platform.custommade.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -13,7 +14,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    // ✅ Constructor Injection (BEST PRACTICE)
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -21,21 +21,17 @@ public class UserService {
     // ✅ Create new user
     public User createUser(User user) {
 
-        // 🔍 Check email uniqueness
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
-        // 🔍 Check phone uniqueness
         if (userRepository.findByPhone(user.getPhone()).isPresent()) {
             throw new UserAlreadyExistsException("Phone number already exists");
         }
 
-        // ⚙️ Default values
-        user.setRole(Role.CUSTOMER);
+        user.setRole(Role.CUSTOMER); // Default role
         user.setActive(true);
 
-        // 💾 Save to database
         return userRepository.save(user);
     }
 
@@ -47,5 +43,10 @@ public class UserService {
     // 🔎 Find user by phone
     public Optional<User> findByPhone(String phone) {
         return userRepository.findByPhone(phone);
+    }
+
+    // ✅ New: find all users by role
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findByRole(role);
     }
 }
