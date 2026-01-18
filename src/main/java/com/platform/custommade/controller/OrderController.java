@@ -17,50 +17,34 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // ✅ Create Order from ACCEPTED Quote
-    // POST /api/orders?quoteId=1
+    // Create Order from ACCEPTED Quote
     @PostMapping
-    public OrderResponseDTO createOrder(
-            @RequestParam("quoteId") Long quoteId
-    ) {
+    public OrderResponseDTO createOrder(@RequestParam("quoteId") Long quoteId) {
         return orderService.createOrder(quoteId);
     }
 
-    // ✅ Get Order by Quote ID
-    // GET /api/orders/by-quote/1
+    // Get Order by Quote ID
     @GetMapping("/by-quote/{quoteId}")
-    public OrderResponseDTO getOrderByQuote(
-            @PathVariable("quoteId") Long quoteId
-    ) {
+    public OrderResponseDTO getOrderByQuote(@PathVariable("quoteId") Long quoteId) {
         return orderService.getOrderByQuoteId(quoteId);
     }
 
-    // ✅ Get all orders for a customer
-    // GET /api/orders/customer/1
+    // Get all orders for a customer
     @GetMapping("/customer/{customerId}")
-    public List<OrderResponseDTO> getOrdersByCustomer(
-            @PathVariable("customerId") Long customerId
-    ) {
+    public List<OrderResponseDTO> getOrdersByCustomer(@PathVariable("customerId") Long customerId) {
         return orderService.getOrdersByCustomer(customerId);
     }
 
-    // ✅ Get all orders for a tailor
-    // GET /api/orders/tailor/4
+    // Get all orders for a tailor
     @GetMapping("/tailor/{tailorId}")
-    public List<OrderResponseDTO> getOrdersByTailor(
-            @PathVariable("tailorId") Long tailorId
-    ) {
+    public List<OrderResponseDTO> getOrdersByTailor(@PathVariable("tailorId") Long tailorId) {
         return orderService.getOrdersByTailor(tailorId);
     }
 
-    // ✅ Update Order Status (optional / future use)
-    // PUT /api/orders/1/status?status=COMPLETED
+    // Update Order Status (optional)
     @PutMapping("/{orderId}/status")
-    public OrderResponseDTO updateOrderStatus(
-            @PathVariable("orderId") Long orderId,
-            @RequestParam("status") OrderStatus status
-    ) {
-        // optional: implement later if needed
+    public OrderResponseDTO updateOrderStatus(@PathVariable("orderId") Long orderId,
+                                              @RequestParam("status") OrderStatus status) {
         throw new UnsupportedOperationException("Status update not implemented yet");
     }
 }

@@ -20,20 +20,19 @@ public class QuoteController {
     // ✅ CREATE QUOTE (Tailor)
     @PostMapping
     public QuoteResponseDTO createQuote(
-            @RequestParam("tailorId") Long tailorId,  // explicitly specify the name
+            @RequestParam("tailorId") Long tailorId,
             @RequestBody CreateQuoteDTO dto
     ) {
         return quoteService.createQuote(dto, tailorId);
     }
 
-
+    // ✅ GET QUOTES BY REQUEST
     @GetMapping("/request/{requestId}")
     public List<QuoteResponseDTO> getQuotesByRequest(
             @PathVariable("requestId") Long requestId
     ) {
         return quoteService.getQuotesByRequest(requestId);
     }
-
 
     // ✅ GET QUOTE BY ID
     @GetMapping("/{quoteId}")
@@ -48,7 +47,6 @@ public class QuoteController {
     ) {
         return quoteService.acceptQuote(quoteId);
     }
-
 
     // ✅ REJECT QUOTE
     @PutMapping("/{quoteId}/reject")

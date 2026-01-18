@@ -1,12 +1,14 @@
 package com.platform.custommade.controller;
 
+import com.platform.custommade.dto.request.CreatePaymentDTO;
+import com.platform.custommade.dto.response.PaymentResponseDTO;
 import com.platform.custommade.model.Payment;
-import com.platform.custommade.model.PaymentStatus;
 import com.platform.custommade.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -18,73 +20,92 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    // -------------------------------
-    // Create a payment for an order
-    // -------------------------------
-    @PostMapping("/create")
-    public ResponseEntity<Payment> createPayment(
-            @RequestParam Long orderId,
-            @RequestParam Double amount) {
+    // --------------------------------------------------
+    // CREATE PAYMENT (ESCROW HOLD)
+    // --------------------------------------------------
+    @PostMapping
+    public ResponseEntity<PaymentResponseDTO> createPayment(
+            @RequestBody CreatePaymentDTO dto) {
 
-        Payment payment = paymentService.createPayment(orderId, amount);
-        return ResponseEntity.ok(payment);
+        Payment payment = paymentService.createPayment(dto);
+        return ResponseEntity.ok(toResponse(payment));
     }
 
-    // -------------------------------
-    // Get all payments for a customer
-    // -------------------------------
+    // --------------------------------------------------
+    // GET PAYMENTS BY CUSTOMER
+    // --------------------------------------------------
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Payment>> getPaymentsByCustomer(@PathVariable Long customerId) {
-        List<Payment> payments = paymentService.getPaymentsByCustomer(customerId);
-        return ResponseEntity.ok(payments);
+    public ResponseEntity<List<PaymentResponseDTO>> getPaymentsByCustomer(
+            @PathVariable Long customerId) {
+
+        List<PaymentResponseDTO> response = paymentService
+                .getPaymentsByCustomer(customerId)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
-    // -------------------------------
-    // Get all payments (admin)
-    // -------------------------------
+    // --------------------------------------------------
+    // ADMIN: GET ALL PAYMENTS
+    // --------------------------------------------------
     @GetMapping("/all")
-    public ResponseEntity<List<Payment>> getAllPayments() {
-        List<Payment> payments = paymentService.getAllPayments();
-        return ResponseEntity.ok(payments);
+    public ResponseEntity<List<PaymentResponseDTO>> getAllPayments() {
+
+        List<PaymentResponseDTO> response = paymentService
+                .getAllPayments()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
-    // -------------------------------
-    // Update payment status
-    // -------------------------------
-    @PutMapping("/{paymentId}/status")
-    public ResponseEntity<Payment> updatePaymentStatus(
-            @PathVariable Long paymentId,
-            @RequestParam PaymentStatus status) {
-
-        Payment payment = paymentService.updatePaymentStatus(paymentId, status);
-        return ResponseEntity.ok(payment);
-    }
-
-    // -------------------------------
-    // Release payment (shortcut)
-    // -------------------------------
+    // --------------------------------------------------
+    // RELEASE PAYMENT (ADMIN / DISPUTE RESOLUTION)
+    // --------------------------------------------------
     @PutMapping("/{paymentId}/release")
-    public ResponseEntity<Payment> releasePayment(@PathVariable Long paymentId) {
+    public ResponseEntity<PaymentResponseDTO> releasePayment(
+            @PathVariable Long paymentId) {
+
         Payment payment = paymentService.releasePayment(paymentId);
-        return ResponseEntity.ok(payment);
+        return ResponseEntity.ok(toResponse(payment));
     }
 
-    // -------------------------------
-    // Refund payment (shortcut)
-    // -------------------------------
+    // --------------------------------------------------
+    // REFUND PAYMENT (ADMIN / DISPUTE RESOLUTION)
+    // --------------------------------------------------
     @PutMapping("/{paymentId}/refund")
-    public ResponseEntity<Payment> refundPayment(@PathVariable Long paymentId) {
+    public ResponseEntity<PaymentResponseDTO> refundPayment(
+            @PathVariable Long paymentId) {
+
         Payment payment = paymentService.refundPayment(paymentId);
-        return ResponseEntity.ok(payment);
+        return ResponseEntity.ok(toResponse(payment));
     }
 
-    // -------------------------------
-    // Get a single payment by ID
-    // -------------------------------
+    // --------------------------------------------------
+    // GET SINGLE PAYMENT BY ID
+    // --------------------------------------------------
     @GetMapping("/{paymentId}")
-    public ResponseEntity<Payment> getPayment(@PathVariable Long paymentId) {
-        Payment payment = paymentService.getPayment(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
-        return ResponseEntity.ok(payment);
+    public ResponseEntity<PaymentResponseDTO> getPayment(
+            @PathVariable Long paymentId) {
+
+        Payment payment = paymentService.getPaymentById(paymentId);
+        return ResponseEntity.ok(toResponse(payment));
+    }
+
+    // --------------------------------------------------
+    // MAPPER
+    // --------------------------------------------------
+    private PaymentResponseDTO toResponse(Payment payment) {
+        PaymentResponseDTO dto = new PaymentResponseDTO();
+        dto.setId(payment.getId());
+        dto.setOrderId(payment.getOrder().getId());
+        dto.setAmount(payment.getAmount().doubleValue());
+        dto.setStatus(payment.getStatus().name());
+        dto.setPaymentGatewayId(payment.getPaymentGatewayId());
+        dto.setCreatedAt(payment.getCreatedAt());
+        return dto;
     }
 }

@@ -25,27 +25,37 @@ public class OrderService {
         this.quoteRepository = quoteRepository;
     }
 
-    // ✅ Create order from accepted quote
+    // Create order from accepted quote
     public OrderResponseDTO createOrder(Long quoteId) {
 
         Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Quote not found with id: " + quoteId)
-                );
+                .orElseThrow(() -> new RuntimeException("Quote not found"));
+
+        // ensure quote is accepted
+        if (!quote.getStatus().name().equals("ACCEPTED")) {
+            throw new RuntimeException("Quote must be ACCEPTED to create order");
+        }
+
+        orderRepository.findByQuoteId(quoteId).ifPresent(o -> {
+            throw new RuntimeException("Order already exists for this quote");
+        });
 
         Order order = new Order();
         order.setQuote(quote);
         order.setRequest(quote.getRequest());
         order.setCustomer(quote.getRequest().getCustomer());
         order.setTailor(quote.getTailor());
-        order.setStatus(OrderStatus.PAID);
+
+        // FIX: should start with OPEN
+        order.setStatus(OrderStatus.OPEN);
+
         order.setCreatedAt(LocalDateTime.now());
 
         Order saved = orderRepository.save(order);
         return mapToResponse(saved);
     }
 
-    // ✅ Get order by quoteId
+    // Get order by quoteId
     public OrderResponseDTO getOrderByQuoteId(Long quoteId) {
 
         Order order = orderRepository.findByQuoteId(quoteId)
@@ -56,7 +66,7 @@ public class OrderService {
         return mapToResponse(order);
     }
 
-    // ✅ Orders by customer
+    // Orders by customer
     public List<OrderResponseDTO> getOrdersByCustomer(Long customerId) {
         return orderRepository.findByCustomerId(customerId)
                 .stream()
@@ -64,7 +74,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Orders by tailor
+    // Orders by tailor
     public List<OrderResponseDTO> getOrdersByTailor(Long tailorId) {
         return orderRepository.findByTailorId(tailorId)
                 .stream()
@@ -72,7 +82,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    // 🔁 MAPPER (THIS WAS MISSING)
+    // Mapper
     private OrderResponseDTO mapToResponse(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
@@ -82,6 +92,10 @@ public class OrderService {
         dto.setQuoteId(order.getQuote().getId());
         dto.setStatus(order.getStatus().name());
         dto.setCreatedAt(order.getCreatedAt());
+
+        // Add amount
+        dto.setAmount(order.getAmount());
+
         return dto;
     }
 }

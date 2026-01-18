@@ -15,6 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByRequestId(Long requestId);
 
     Optional<Order> findByQuoteId(Long quoteId);
+    boolean existsByQuoteId(Long quoteId);
 
 }
 

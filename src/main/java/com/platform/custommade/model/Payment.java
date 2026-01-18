@@ -1,6 +1,7 @@
 package com.platform.custommade.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,20 +12,24 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
+    @OneToOne
+    @JoinColumn(name = "order_id", unique = true, nullable = false)
     private Order order;
 
-    private Double amount;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
     private String paymentGatewayId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentStatus status;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // ✅ Getters and Setters
+    // ---------------- GETTERS & SETTERS ----------------
 
     public Long getId() {
         return id;
@@ -42,11 +47,11 @@ public class Payment {
         this.order = order;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

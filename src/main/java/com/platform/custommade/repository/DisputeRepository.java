@@ -10,5 +10,7 @@ public interface DisputeRepository extends JpaRepository<Dispute, Long> {
     // Optional: Find all disputes by order ID
     List<Dispute> findByOrderId(Long orderId);
     List<Dispute> findByRaisedById(Long userId);
+    boolean existsByOrderId(Long orderId);
+
 
 }

@@ -1,18 +1,16 @@
 package com.platform.custommade.repository;
 
 import com.platform.custommade.model.Payment;
-import com.platform.custommade.model.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    // Optional: find payments by order
-    List<Payment> findByOrderId(Long orderId);
+    boolean existsByOrderId(Long orderId);
 
-    // Optional: find payments by status
-    List<Payment> findByStatus(PaymentStatus status);
+    Optional<Payment> findByOrderId(Long orderId);
 
     List<Payment> findByOrderCustomerId(Long customerId);
 

@@ -20,10 +20,7 @@ public class Quote {
     private User tailor;
 
     private Double price;
-    private Double advanceAmount;
-    private int deliveryDays;
-
-    @Column(columnDefinition = "TEXT")
+    private Integer deliveryDays;
     private String notes;
 
     @Enumerated(EnumType.STRING)
@@ -31,77 +28,33 @@ public class Quote {
 
     private LocalDateTime createdAt;
 
-    // ---------------- Getters and Setters ----------------
+    // Getters & Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public Request getRequest() { return request; }
+    public void setRequest(Request request) { this.request = request; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public User getTailor() { return tailor; }
+    public void setTailor(User tailor) { this.tailor = tailor; }
 
-    public Request getRequest() {
-        return request;
-    }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 
-    public void setRequest(Request request) {
-        this.request = request;
-    }
+    public Integer getDeliveryDays() { return deliveryDays; }
+    public void setDeliveryDays(Integer deliveryDays) { this.deliveryDays = deliveryDays; }
 
-    public User getTailor() {
-        return tailor;
-    }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
-    public void setTailor(User tailor) {
-        this.tailor = tailor;
-    }
+    public QuoteStatus getStatus() { return status; }
+    public void setStatus(QuoteStatus status) { this.status = status; }
 
-    public Double getPrice() {
-        return price;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Double getAdvanceAmount() {
-        return advanceAmount;
-    }
-
-    public void setAdvanceAmount(Double advanceAmount) {
-        this.advanceAmount = advanceAmount;
-    }
-
-    public int getDeliveryDays() {
-        return deliveryDays;
-    }
-
-    public void setDeliveryDays(int deliveryDays) {
-        this.deliveryDays = deliveryDays;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public QuoteStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(QuoteStatus status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

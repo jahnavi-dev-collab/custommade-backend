@@ -1,4 +1,3 @@
-// QuoteResponseDTO.java — for Customer viewing quotes
 package com.platform.custommade.dto.response;
 
 public class QuoteResponseDTO {
