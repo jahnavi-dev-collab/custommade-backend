@@ -11,27 +11,35 @@ public class Dispute {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
+    // One order can have multiple disputes (history)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne
-    @JoinColumn(name = "raised_by")
-    private User raisedBy; // Usually the customer
+    // Who raised the dispute (usually customer)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "raised_by", nullable = false)
+    private User raisedBy;
 
+    @Column(nullable = false, length = 255)
     private String reason;
+
+    @Column(length = 1000)
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private DisputeStatus status;
 
-    private String adminNotes; // ✅ Admin can add notes/resolution comments
+    @Column(length = 1000)
+    private String adminNotes;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // ==========================
+    // -------------------------
     // Getters & Setters
-    // ==========================
+    // -------------------------
 
     public Long getId() {
         return id;

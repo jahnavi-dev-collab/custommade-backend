@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +40,12 @@ public class OrderService {
         orderRepository.findByQuoteId(quoteId).ifPresent(o -> {
             throw new RuntimeException("Order already exists for this quote");
         });
+
+        // If order exists, return existing order
+        Optional<Order> existing = orderRepository.findByQuoteId(quoteId);
+        if (existing.isPresent()) {
+            return mapToResponse(existing.get());
+        }
 
         Order order = new Order();
         order.setQuote(quote);

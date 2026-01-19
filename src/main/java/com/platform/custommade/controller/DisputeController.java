@@ -22,6 +22,25 @@ public class DisputeController {
         this.disputeService = disputeService;
     }
 
+    // --------------------------------------------------
+    // CREATE DISPUTE
+    // --------------------------------------------------
+    @PostMapping
+    public ResponseEntity<DisputeResponseDTO> raiseDispute(
+            @RequestBody @Valid RequestDisputeDTO dto
+    ) {
+        Dispute dispute = disputeService.raiseDispute(
+                dto.getOrderId(),
+                dto.getRaisedById(),
+                dto.getReason(),
+                dto.getDescription()
+        );
+
+        return ResponseEntity.ok(mapToResponse(dispute));
+    }
+
+
+
     @PutMapping("/{disputeId}/resolve")
     public ResponseEntity<DisputeResponseDTO> resolveDispute(
             @PathVariable("disputeId") Long disputeId,
