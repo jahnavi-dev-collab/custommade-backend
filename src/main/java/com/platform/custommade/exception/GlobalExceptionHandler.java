@@ -2,59 +2,44 @@ package com.platform.custommade.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.stream.Collectors;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 🔴 Validation errors
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
-
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-
-        return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message),
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
-    // 🔴 Business logic errors
+    // ❌ Invalid credentials / generic errors
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-
+    public ResponseEntity<ApiError> handleRuntime(RuntimeException ex) {
         return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                new ApiError(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+    // ❌ Validation errors (@Valid)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
+
+        String errorMsg = ex.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
         return new ResponseEntity<>(
-                new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED.value(), ex.getMessage()),
-                HttpStatus.METHOD_NOT_ALLOWED
+                new ApiError(HttpStatus.BAD_REQUEST.value(), errorMsg),
+                HttpStatus.BAD_REQUEST
         );
     }
 
-    // 🔴 Fallback (unexpected errors)
+    // ❌ Fallback (unexpected errors)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
-
+    public ResponseEntity<ApiError> handleAll(Exception ex) {
         return new ResponseEntity<>(
-                new ErrorResponse(
+                new ApiError(
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Something went wrong. Please try again later."
+                        "Something went wrong"
                 ),
                 HttpStatus.INTERNAL_SERVER_ERROR
         );

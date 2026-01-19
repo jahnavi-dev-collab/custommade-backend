@@ -2,7 +2,7 @@ package com.platform.custommade.dto.response;
 
 import com.platform.custommade.model.Role;
 
-public class UserResponse {
+public class UserResponseDTO {
 
     private Long id;
     private String name;
@@ -11,7 +11,7 @@ public class UserResponse {
     private Role role;
 
     // Constructor
-    public UserResponse(Long id, String name, String email, String phone, Role role) {
+    public UserResponseDTO(Long id, String name, String email, String phone, Role role) {
         this.id = id;
         this.name = name;
         this.email = email;

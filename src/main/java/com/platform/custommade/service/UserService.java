@@ -4,6 +4,7 @@ import com.platform.custommade.exception.UserAlreadyExistsException;
 import com.platform.custommade.model.Role;
 import com.platform.custommade.model.User;
 import com.platform.custommade.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +14,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ✅ Create new user
@@ -29,23 +33,29 @@ public class UserService {
             throw new UserAlreadyExistsException("Phone number already exists");
         }
 
+        // 🔐 HASH PASSWORD
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         user.setRole(Role.CUSTOMER); // Default role
         user.setActive(true);
 
         return userRepository.save(user);
     }
 
-    // 🔎 Find user by email
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    // 🔎 Find user by phone
     public Optional<User> findByPhone(String phone) {
         return userRepository.findByPhone(phone);
     }
 
-    // ✅ New: find all users by role
+    public User getCurrentUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);
     }

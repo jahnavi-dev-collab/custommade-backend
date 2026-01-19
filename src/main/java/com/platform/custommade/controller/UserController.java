@@ -1,11 +1,13 @@
 package com.platform.custommade.controller;
 
 import com.platform.custommade.dto.request.CreateUserRequest;
-import com.platform.custommade.dto.response.UserResponse;
+import com.platform.custommade.dto.response.UserResponseDTO;
 import com.platform.custommade.model.Role;
 import com.platform.custommade.model.User;
 import com.platform.custommade.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,12 @@ public class UserController {
     }
 
     // 📌 Register user
+    // 📌 Register user
     @PostMapping("/register")
-    public UserResponse register(@Valid @RequestBody CreateUserRequest request) {
+    public UserResponseDTO register(@Valid @RequestBody CreateUserRequest request) {
+
+        // 🔍 DEBUG LOG (temporary)
+        System.out.println("REGISTER HIT: " + request.getEmail());
 
         User user = new User();
         user.setName(request.getName());
@@ -39,7 +45,7 @@ public class UserController {
 
         User savedUser = userService.createUser(user);
 
-        return new UserResponse(
+        return new UserResponseDTO(
                 savedUser.getId(),
                 savedUser.getName(),
                 savedUser.getEmail(),
@@ -50,24 +56,25 @@ public class UserController {
 
     // ✅ New: Get users by role
     // ✅ Get users by role
-    @GetMapping
-    public List<UserResponse> getUsersByRole(@RequestParam("role") String roleStr) {
-        Role role;
-        try {
-            role = Role.valueOf(roleStr.toUpperCase()); // Convert string to enum safely
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid role: " + roleStr);
-        }
+    // 👤 Get current logged-in user
+    @GetMapping("/me")
+    public UserResponseDTO getCurrentUser() {
 
-        List<User> users = userService.getUsersByRole(role);
-        return users.stream()
-                .map(u -> new UserResponse(
-                        u.getId(),
-                        u.getName(),
-                        u.getEmail(),
-                        u.getPhone(),
-                        u.getRole()
-                ))
-                .collect(Collectors.toList());
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName(); // JWT subject
+
+        User user = userService.getCurrentUser(email);
+
+        return new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getRole()
+        );
     }
+
+
 }
