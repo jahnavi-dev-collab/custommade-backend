@@ -15,11 +15,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ReviewService reviewService;
 
     public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       ReviewService reviewService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.reviewService = reviewService;
     }
 
     // Generic method
@@ -61,6 +64,10 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public double getTailorAverageRating(Long tailorId) {
+        return reviewService.calculateAverageRating(tailorId);
     }
 
     public List<User> getUsersByRole(Role role) {

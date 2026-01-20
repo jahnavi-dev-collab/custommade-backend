@@ -22,6 +22,10 @@ public class OrderController {
         this.userService = userService;
     }
 
+    // =========================
+    // CREATE / FETCH
+    // =========================
+
     // Create Order from ACCEPTED Quote
     @PostMapping
     public OrderResponseDTO createOrder(@RequestParam("quoteId") Long quoteId) {
@@ -30,28 +34,13 @@ public class OrderController {
 
     // Get Order by Quote ID
     @GetMapping("/by-quote/{quoteId}")
-    public OrderResponseDTO getOrderByQuote(@PathVariable("quoteId") Long quoteId) {
+    public OrderResponseDTO getOrderByQuote(@PathVariable Long quoteId) {
         return orderService.getOrderByQuoteId(quoteId);
     }
 
-    // Get all orders for a customer
-    @GetMapping("/customer/{customerId}")
-    public List<OrderResponseDTO> getOrdersByCustomer(@PathVariable("customerId") Long customerId) {
-        return orderService.getOrdersByCustomer(customerId);
-    }
-
-    // Get all orders for a tailor
-    @GetMapping("/tailor/{tailorId}")
-    public List<OrderResponseDTO> getOrdersByTailor(@PathVariable("tailorId") Long tailorId) {
-        return orderService.getOrdersByTailor(tailorId);
-    }
-
-    // Update Order Status (optional)
-    @PutMapping("/{orderId}/status")
-    public OrderResponseDTO updateOrderStatus(@PathVariable("orderId") Long orderId,
-                                              @RequestParam("status") OrderStatus status) {
-        throw new UnsupportedOperationException("Status update not implemented yet");
-    }
+    // =========================
+    // CUSTOMER (JWT-based)
+    // =========================
 
     @GetMapping("/customer/orders")
     public List<OrderResponseDTO> getCustomerOrders(Authentication authentication) {
@@ -60,10 +49,63 @@ public class OrderController {
         return orderService.getOrdersByCustomer(customerId);
     }
 
+    // =========================
+    // TAILOR (JWT-based)
+    // =========================
+
     @GetMapping("/tailor/orders")
     public List<OrderResponseDTO> getTailorOrders(Authentication authentication) {
         String email = authentication.getName();
         Long tailorId = userService.getCurrentUser(email).getId();
         return orderService.getOrdersByTailor(tailorId);
+    }
+
+    // =========================
+    // ADMIN LOOKUPS
+    // =========================
+
+    @GetMapping("/admin/customer/{customerId}")
+    public List<OrderResponseDTO> getOrdersByCustomerAdmin(
+            @PathVariable Long customerId) {
+        return orderService.getOrdersByCustomer(customerId);
+    }
+
+    @GetMapping("/admin/tailor/{tailorId}")
+    public List<OrderResponseDTO> getOrdersByTailorAdmin(
+            @PathVariable Long tailorId) {
+        return orderService.getOrdersByTailor(tailorId);
+    }
+
+    // =========================
+    // ORDER LIFECYCLE
+    // =========================
+
+    @PutMapping("/{orderId}/start")
+    public OrderResponseDTO startOrder(@PathVariable Long orderId,
+                                       Authentication authentication) {
+        return orderService.startOrder(orderId, authentication.getName());
+    }
+
+    @PutMapping("/{orderId}/deliver")
+    public OrderResponseDTO confirmDelivery(@PathVariable Long orderId,
+                                            Authentication authentication) {
+        Long tailorId = userService.getCurrentUser(authentication.getName()).getId();
+        return orderService.confirmDelivery(orderId, tailorId);
+    }
+
+    @PutMapping("/{orderId}/cancel")
+    public OrderResponseDTO cancelOrder(@PathVariable Long orderId,
+                                        Authentication authentication) {
+        return orderService.cancelOrder(orderId, authentication.getName());
+    }
+
+    // =========================
+    // OPTIONAL (future)
+    // =========================
+
+    @PutMapping("/{orderId}/status")
+    public OrderResponseDTO updateOrderStatus(@PathVariable Long orderId,
+                                              @RequestParam OrderStatus status) {
+        throw new UnsupportedOperationException("Status update not implemented yet");
     }
 }

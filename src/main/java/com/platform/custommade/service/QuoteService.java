@@ -2,6 +2,7 @@ package com.platform.custommade.service;
 
 import com.platform.custommade.dto.request.CreateQuoteDTO;
 import com.platform.custommade.dto.response.QuoteResponseDTO;
+import com.platform.custommade.exception.ConflictException;
 import com.platform.custommade.exception.ResourceNotFoundException;
 import com.platform.custommade.model.*;
 import com.platform.custommade.repository.OrderRepository;
@@ -9,6 +10,7 @@ import com.platform.custommade.repository.QuoteRepository;
 import com.platform.custommade.repository.RequestRepository;
 import com.platform.custommade.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -81,28 +83,57 @@ public class QuoteService {
 
 
     // ================= ACCEPT =================
+    @Transactional
     public QuoteResponseDTO acceptQuote(Long quoteId) {
-        Quote quote = quoteRepository.findById(quoteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quote not found with id: " + quoteId));
 
-        // if order already exists for this quote -> just return
-        boolean orderExists = orderRepository.existsByQuoteId(quoteId);
-        if (orderExists) {
-            return mapToResponseDTO(quote);
+        Quote acceptedQuote = quoteRepository.findById(quoteId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Quote not found with id: " + quoteId)
+                );
+
+        // ❌ Prevent accepting a REJECTED quote
+        if (acceptedQuote.getStatus() == QuoteStatus.REJECTED) {
+            throw new ConflictException("Cannot accept a rejected quote");
         }
 
-        quote.setStatus(QuoteStatus.ACCEPTED);
-        quoteRepository.save(quote);
+        // if order already exists, return safely (idempotent)
+        if (orderRepository.existsByQuoteId(quoteId)) {
+            return mapToResponseDTO(acceptedQuote);
+        }
 
-        // Update request status
-        Request request = quote.getRequest();
+        // if already accepted, return safely
+        if (acceptedQuote.getStatus() == QuoteStatus.ACCEPTED) {
+            return mapToResponseDTO(acceptedQuote);
+        }
+
+        Request request = acceptedQuote.getRequest();
+
+        // ❌ Prevent accepting when request already ORDERED
+        if (request.getStatus() == RequestStatus.ORDERED) {
+            throw new ConflictException("Request already ordered. Cannot accept another quote.");
+        }
+
+        // ✅ Accept selected quote, reject all others
+        List<Quote> allQuotes = quoteRepository.findByRequestId(request.getId());
+
+        for (Quote quote : allQuotes) {
+            if (quote.getId().equals(quoteId)) {
+                quote.setStatus(QuoteStatus.ACCEPTED);
+            } else {
+                quote.setStatus(QuoteStatus.REJECTED);
+            }
+        }
+        // save all quote updates
+        quoteRepository.saveAll(allQuotes);
+
+        // update request status
         request.setStatus(RequestStatus.ORDERED);
         requestRepository.save(request);
 
-        // ⚡ Auto create order after accepting quote
+        // ⚡ auto-create order (idempotent)
         orderService.createOrder(quoteId);
 
-        return mapToResponseDTO(quote);
+        return mapToResponseDTO(acceptedQuote);
     }
 
 

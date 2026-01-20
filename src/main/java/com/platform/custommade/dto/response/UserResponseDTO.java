@@ -10,6 +10,9 @@ public class UserResponseDTO {
     private String phone;
     private Role role;
 
+    private double averageRating;
+    private long reviewCount;
+
     // Constructor
     public UserResponseDTO(Long id, String name, String email, String phone, Role role) {
         this.id = id;
@@ -17,6 +20,17 @@ public class UserResponseDTO {
         this.email = email;
         this.phone = phone;
         this.role = role;
+    }
+
+    public UserResponseDTO(Long id, String name, String email, String phone,
+                           Role role, double averageRating, long reviewCount) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.role = role;
+        this.averageRating = averageRating;
+        this.reviewCount = reviewCount;
     }
 
     // Getters only (NO setters)
@@ -39,4 +53,7 @@ public class UserResponseDTO {
     public Role getRole() {
         return role;
     }
+
+    public double getAverageRating() { return averageRating; }
+    public long getReviewCount() { return reviewCount; }
 }

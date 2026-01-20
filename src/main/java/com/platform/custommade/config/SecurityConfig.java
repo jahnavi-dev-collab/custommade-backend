@@ -33,12 +33,16 @@ public class SecurityConfig {
                                 "/api/tailor/register"   // <-- ALLOW TAILOR REGISTRATION
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/orders/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/tailor/**").hasRole("TAILOR")
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/tailor/**").hasRole("TAILOR")
                         .requestMatchers("/api/customer/quotes/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/customer/orders/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/tailor/orders/**").hasRole("TAILOR")
+                        .requestMatchers("/api/orders/customer/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/orders/tailor/**").hasRole("TAILOR")
+                        .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers("/api/reviews/tailor/*/rating").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
