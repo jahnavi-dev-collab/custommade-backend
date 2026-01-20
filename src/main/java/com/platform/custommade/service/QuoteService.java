@@ -21,15 +21,18 @@ public class QuoteService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     public QuoteService(QuoteRepository quoteRepository,
                         RequestRepository requestRepository,
                         UserRepository userRepository,
-                        OrderRepository orderRepository) {
+                        OrderRepository orderRepository,
+                        OrderService orderService) {
         this.quoteRepository = quoteRepository;
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     // ================= CREATE =================
@@ -68,6 +71,15 @@ public class QuoteService {
                 .collect(Collectors.toList());
     }
 
+    // ================= GET BY TAILOR =================
+    public List<QuoteResponseDTO> getQuotesByTailor(Long tailorId) {
+        List<Quote> quotes = quoteRepository.findByTailorId(tailorId);
+        return quotes.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
     // ================= ACCEPT =================
     public QuoteResponseDTO acceptQuote(Long quoteId) {
         Quote quote = quoteRepository.findById(quoteId)
@@ -87,20 +99,12 @@ public class QuoteService {
         request.setStatus(RequestStatus.ORDERED);
         requestRepository.save(request);
 
-        // Create order
-        Order order = new Order();
-        order.setRequest(request);
-        order.setQuote(quote);
-        order.setCustomer(request.getCustomer());
-        order.setTailor(quote.getTailor());
-        order.setAmount(quote.getPrice());
-        order.setStatus(OrderStatus.OPEN);
-        order.setCreatedAt(LocalDateTime.now());
-
-        orderRepository.save(order);
+        // ⚡ Auto create order after accepting quote
+        orderService.createOrder(quoteId);
 
         return mapToResponseDTO(quote);
     }
+
 
     // ================= REJECT =================
     public QuoteResponseDTO rejectQuote(Long quoteId) {

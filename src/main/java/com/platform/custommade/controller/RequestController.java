@@ -2,43 +2,41 @@ package com.platform.custommade.controller;
 
 import com.platform.custommade.dto.request.CreateRequestDTO;
 import com.platform.custommade.dto.response.RequestResponseDTO;
+import com.platform.custommade.model.User;
 import com.platform.custommade.service.RequestService;
+import com.platform.custommade.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/requests")
+@RequestMapping("/api/customer")
 public class RequestController {
 
     private final RequestService requestService;
+    private final UserService userService;
 
-    public RequestController(RequestService requestService) {
+    public RequestController(RequestService requestService,
+                             UserService userService) {
         this.requestService = requestService;
+        this.userService = userService;
     }
 
-    // ✅ Create request
-    @PostMapping
+    @PostMapping("/requests")
     public RequestResponseDTO createRequest(
-            @RequestParam("customerId") Long customerId,
+            Authentication authentication,
             @RequestBody CreateRequestDTO dto
     ) {
-        return requestService.createRequest(customerId, dto);
+        String email = authentication.getName();
+        User customer = userService.getCurrentUser(email);
+
+        return requestService.createRequest(customer.getId(), dto);
     }
 
-    // ✅ Get all requests of a customer
-    @GetMapping("/customer/{customerId}")
-    public List<RequestResponseDTO> getRequestsByCustomer(
-            @PathVariable("customerId") Long customerId
-    ) {
-        return requestService.getRequestsByCustomer(customerId);
-    }
-
-    // ✅ Get request by ID
-    @GetMapping("/{requestId}")
-    public RequestResponseDTO getRequestById(
-            @PathVariable("requestId") Long requestId
-    ) {
-        return requestService.getRequestById(requestId);
+    @GetMapping("/requests")
+    public List<RequestResponseDTO> getMyRequests(Authentication authentication) {
+        String email = authentication.getName();
+        return requestService.getRequestsByCustomer(email);
     }
 }

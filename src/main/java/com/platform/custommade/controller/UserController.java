@@ -30,7 +30,6 @@ public class UserController {
     }
 
     // 📌 Register user
-    // 📌 Register user
     @PostMapping("/register")
     public UserResponseDTO register(@Valid @RequestBody CreateUserRequest request) {
 
@@ -43,7 +42,7 @@ public class UserController {
         user.setPhone(request.getPhone());
         user.setPassword(request.getPassword());
 
-        User savedUser = userService.createUser(user);
+        User savedUser = userService.createUser(user, Role.CUSTOMER);
 
         return new UserResponseDTO(
                 savedUser.getId(),
@@ -54,9 +53,9 @@ public class UserController {
         );
     }
 
-    // ✅ New: Get users by role
-    // ✅ Get users by role
-    // 👤 Get current logged-in user
+    //  New: Get users by role
+    //  Get users by role
+    //  Get current logged-in user
     @GetMapping("/me")
     public UserResponseDTO getCurrentUser() {
 
@@ -75,6 +74,4 @@ public class UserController {
                 user.getRole()
         );
     }
-
-
 }

@@ -3,6 +3,8 @@ package com.platform.custommade.controller;
 import com.platform.custommade.dto.response.OrderResponseDTO;
 import com.platform.custommade.model.OrderStatus;
 import com.platform.custommade.service.OrderService;
+import com.platform.custommade.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +14,12 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final UserService userService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService,
+                           UserService userService) {
         this.orderService = orderService;
+        this.userService = userService;
     }
 
     // Create Order from ACCEPTED Quote
@@ -46,5 +51,19 @@ public class OrderController {
     public OrderResponseDTO updateOrderStatus(@PathVariable("orderId") Long orderId,
                                               @RequestParam("status") OrderStatus status) {
         throw new UnsupportedOperationException("Status update not implemented yet");
+    }
+
+    @GetMapping("/customer/orders")
+    public List<OrderResponseDTO> getCustomerOrders(Authentication authentication) {
+        String email = authentication.getName();
+        Long customerId = userService.getCurrentUser(email).getId();
+        return orderService.getOrdersByCustomer(customerId);
+    }
+
+    @GetMapping("/tailor/orders")
+    public List<OrderResponseDTO> getTailorOrders(Authentication authentication) {
+        String email = authentication.getName();
+        Long tailorId = userService.getCurrentUser(email).getId();
+        return orderService.getOrdersByTailor(tailorId);
     }
 }

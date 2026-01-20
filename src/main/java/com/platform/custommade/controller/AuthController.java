@@ -1,6 +1,9 @@
 package com.platform.custommade.controller;
 
+import com.platform.custommade.dto.request.CreateUserRequest;
 import com.platform.custommade.dto.request.LoginRequest;
+import com.platform.custommade.dto.response.UserResponseDTO;
+import com.platform.custommade.model.Role;
 import com.platform.custommade.model.User;
 import com.platform.custommade.service.UserService;
 import jakarta.validation.Valid;
@@ -43,4 +46,24 @@ public class AuthController {
                 user.getRole().name()
         );
     }
+
+    @PostMapping("/register")
+    public UserResponseDTO register(@Valid @RequestBody CreateUserRequest request) {
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setPassword(request.getPassword());
+
+        User saved = userService.createUser(user, Role.CUSTOMER);
+
+        return new UserResponseDTO(
+                saved.getId(),
+                saved.getName(),
+                saved.getEmail(),
+                saved.getPhone(),
+                saved.getRole()
+        );
+    }
+
 }

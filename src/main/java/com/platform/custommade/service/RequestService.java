@@ -8,6 +8,7 @@ import com.platform.custommade.model.User;
 import com.platform.custommade.repository.RequestRepository;
 import com.platform.custommade.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.platform.custommade.model.RequestStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,7 @@ public class RequestService {
     // ================= CREATE =================
     public RequestResponseDTO createRequest(Long customerId, CreateRequestDTO dto) {
 
-        // 1️⃣ Fetch customer
+        // 1️⃣ Fetch customer by id
         User customer = userRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
@@ -52,10 +53,20 @@ public class RequestService {
     }
 
     // ================= READ =================
+    public List<RequestResponseDTO> getRequestsByCustomer(String customerEmail) {
+        User customer = userRepository.findByEmail(customerEmail)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-    public List<RequestResponseDTO> getRequestsByCustomer(Long customerId) {
-        List<Request> requests = requestRepository.findByCustomerId(customerId);
+        List<Request> requests = requestRepository.findByCustomerId(customer.getId());
 
+        return requests.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    public List<RequestResponseDTO> getOpenRequests() {
+        List<Request> requests = requestRepository.findByStatus(RequestStatus.OPEN);
         return requests.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());

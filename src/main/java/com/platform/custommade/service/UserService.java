@@ -22,8 +22,8 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ Create new user
-    public User createUser(User user) {
+    // Generic method
+    public User createUser(User user, Role role) {
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists");
@@ -33,10 +33,14 @@ public class UserService {
             throw new UserAlreadyExistsException("Phone number already exists");
         }
 
-        // 🔐 HASH PASSWORD
+        if (role == Role.TAILOR && (user.getGovProofNumber() == null || user.getGovProofNumber().isEmpty())) {
+            throw new IllegalArgumentException("Tailor must provide government proof number");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        user.setRole(Role.CUSTOMER); // Default role
+        // Default role if null
+        user.setRole(role == null ? Role.CUSTOMER : role);
         user.setActive(true);
 
         return userRepository.save(user);
@@ -55,6 +59,9 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);

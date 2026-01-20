@@ -1,23 +1,61 @@
 package com.platform.custommade.controller;
 
+import com.platform.custommade.dto.request.CreateUserRequest;
+import com.platform.custommade.dto.response.UserResponseDTO;
+import com.platform.custommade.model.Role;
 import com.platform.custommade.model.User;
-import com.platform.custommade.service.AdminService;
+import com.platform.custommade.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    private final AdminService adminService;
+    private final UserService userService;
 
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
+    public AdminController(UserService userService) {
+        this.userService = userService;
     }
 
+    // ADMIN ONLY: create admin
+    @PostMapping("/create-admin")
+    public UserResponseDTO createAdmin(@Valid @RequestBody CreateUserRequest request) {
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setPassword(request.getPassword());
+
+        // IMPORTANT: ADMIN should only create ADMIN
+        User savedUser = userService.createUser(user, Role.ADMIN);
+
+        return new UserResponseDTO(
+                savedUser.getId(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getPhone(),
+                savedUser.getRole()
+        );
+    }
+
+    // ADMIN ONLY: get all users
     @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return adminService.getAllUsers();
+    public List<UserResponseDTO> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+
+        return users.stream()
+                .map(u -> new UserResponseDTO(
+                        u.getId(),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getPhone(),
+                        u.getRole()
+                ))
+                .collect(Collectors.toList());
     }
 }

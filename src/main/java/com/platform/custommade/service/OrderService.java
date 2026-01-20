@@ -52,10 +52,8 @@ public class OrderService {
         order.setRequest(quote.getRequest());
         order.setCustomer(quote.getRequest().getCustomer());
         order.setTailor(quote.getTailor());
-
-        // FIX: should start with OPEN
+        order.setAmount(quote.getPrice());
         order.setStatus(OrderStatus.OPEN);
-
         order.setCreatedAt(LocalDateTime.now());
 
         Order saved = orderRepository.save(order);

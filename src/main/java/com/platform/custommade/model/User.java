@@ -25,6 +25,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role; // CUSTOMER / TAILOR / ADMIN
 
+    private String govProofNumber;
+
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
@@ -80,6 +82,13 @@ public class User {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    public String getGovProofNumber() {
+        return govProofNumber;
+    }
+
+    public void setGovProofNumber(String govProofNumber) {
+        this.govProofNumber = govProofNumber;
+    }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
